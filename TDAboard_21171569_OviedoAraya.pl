@@ -1,6 +1,6 @@
 % RF04
 % Dominio: No recibe parqmetros de entrada
-% Metaprimaria/0
+% Metaprimaria: board/0
 
 board([
     [0, 0, 0, 0, 0, 0, 0],
@@ -12,6 +12,28 @@ board([
 
 
 % RF05
-% Dominio: board (board)
-can_play(CurrentBoard)
-:- member(0, CurrentBoard).
+
+can_play(Board) :- 
+    board(Board),         
+    mymember(Row, Board),  
+    mymember(0, Row).      
+
+
+%-------------Funciones auxiliares----------------
+%mymember
+mymember(X, [X | _]).
+mymember(X, [_ | Tail]) :-
+    mymember(X, Tail).
+
+
+
+% Insertar elemento al inicio de una lista
+insertarInicio(Element, [], [Element]).
+insertarInicio(Element, List, [Element | List]).
+
+
+% Insertar elemento al final de una lista
+insertarFinal(Element, [], [Element]).
+insertarFinal(Element, [Head | Tail], [Head | NewTail]) :-
+    insertarFinal(Element, Tail, NewTail).
+
