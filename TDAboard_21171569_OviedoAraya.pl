@@ -37,3 +37,4 @@ insertarFinal(Element, [], [Element]).
 insertarFinal(Element, [Head | Tail], [Head | NewTail]) :-
     insertarFinal(Element, Tail, NewTail).
 
+
