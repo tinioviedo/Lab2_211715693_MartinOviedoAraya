@@ -19,6 +19,15 @@ can_play(Board) :-
     mymember(0, Row).      
 
 
+% RF06
+%play_piece(Board, Column, Piece, NewBoard) :-
+    board(Board),
+
+
+
+
+
+
 %-------------Funciones auxiliares----------------
 %mymember
 mymember(X, [X | _]).
@@ -36,5 +45,6 @@ insertarInicio(Element, List, [Element | List]).
 insertarFinal(Element, [], [Element]).
 insertarFinal(Element, [Head | Tail], [Head | NewTail]) :-
     insertarFinal(Element, Tail, NewTail).
+
 
 

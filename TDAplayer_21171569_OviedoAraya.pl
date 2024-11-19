@@ -18,44 +18,24 @@ player(Id, Name, Color, Wins, Losses, Draws, Remaining_pieces, [Id, Name, Color,
     
     
 % Selectores
-get_id([Id, _, _, _, _, _, _], Id).
 % get_id: Selecciona el id del jugador
-% Dominio: 
-% 
-% Recorrido: id: entero
-% 
-get_name([_, Name, _, _, _, _, _], Name).
+get_id([Id, _, _, _, _, _, _], Id).
+
 % get_name: Selecciona el nombre del jugador
-% Dominio:
-%
-% Recorrido: Name: string
+get_name([_, Name, _, _, _, _, _], Name).
 
-get_color([_, _, Color, _, _, _, _], Color).
 % get_color: Selecciona el color del jugador
-% Dominio:
-%
-% Recorrido: Color: string
+get_color([_, _, Color, _, _, _, _], Color).
 
-get_wins([_, _, _, Wins, _, _, _], Wins).
 % get_wins: Selecciona el numero de victorias del jugador
-% Dominio:
+get_wins([_, _, _, Wins, _, _, _], Wins).
 
-% Recorrido: Wins: entero
-
-get_losses([_, _, _, _, Losses, _, _], Losses). 
 % get_losses: Selecciona el numero de derrotas del jugador
-% Dominio:
+get_losses([_, _, _, _, Losses, _, _], Losses). 
 
-% Recorrido: Losses: entero
-
-get_draws([_, _, _, _, _, Draws, _], Draws).
 % get_draws: Selecciona el numero de empates del jugador
-% Dominio:
+get_draws([_, _, _, _, _, Draws, _], Draws).
 
-% Recorrido: Draws: entero
-
-get_remaining_pieces([_, _, _, _, _, _, Remaining_pieces], Remaining_pieces).
 % get_remaining_pieces: Selecciona el numero de fichas restantes del jugador
-% Dominio: 
+get_remaining_pieces([_, _, _, _, _, _, Remaining_pieces], Remaining_pieces).
 
-% Recorrido: Remaining_pieces: entero
