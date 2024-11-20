@@ -7,4 +7,3 @@
 
 piece(Color, [Color]) :- 
     (Color = "red" ; Color = "yellow").
-ss
