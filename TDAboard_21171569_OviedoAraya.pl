@@ -1,4 +1,4 @@
-% RF04
+% RF04 
 % Dominio: No recibe parqmetros de entrada
 % Metaprimaria: board/0
 
@@ -20,54 +20,61 @@ can_play(Board) :-
 
 
 % RF06
+% Dominio: Board X Column X Piece X NewBoard
+% Metaprimaria: play_piece/4
 play_piece(Board, Column, Piece, NewBoard) :-
     board(Board),
     can_play(Board),
     mymember(Column, [1,2,3,4,5,6,7]),
     get_column(Board, Column, ColumnList),
     mymember(0, ColumnList),     % Verificar que la columna no esté llena (tiene al menos un 0)
-    find_lowest_empty_row(ColumnList, RowIndex),
-    replace_at_index_custom(ColumnList, RowIndex, Piece, UpdatedColumn),
-    replace_column(Board, Column, UpdatedColumn, NewBoard).
+    find_lowest_empty_row(ColumnList, RowPosition),
+    update_column_at_position(ColumnList, RowPosition, Piece, UpdatedColumn),
+    update_board_column(Board, Column, UpdatedColumn, NewBoard).
     
     
 % da el índice de la posición más baja disponible
-find_lowest_empty_row(ColumnList, RowIndex) :-
+% Metaprimaria: find_lowest_empty_row/2
+find_lowest_empty_row(ColumnList, RowPosition) :-
     % Función para encontrar el índice del último cero desde abajo
-    find_last_zero_index(ColumnList, 0, RowIndex).
+    find_last_zero_position(ColumnList, 0, RowPosition).
 
 % da el índice del último cero
-find_last_zero_index([], _, -1).
-find_last_zero_index([0|Rest], CurrentIndex, LastZeroIndex) :-
-    NextIndex is CurrentIndex + 1,
-    find_last_zero_index(Rest, NextIndex, PrevLastZeroIndex),
-    (PrevLastZeroIndex = -1 -> LastZeroIndex = CurrentIndex 
-                             ;  LastZeroIndex = PrevLastZeroIndex).
-find_last_zero_index([_|Rest], CurrentIndex, LastZeroIndex) :-
-    NextIndex is CurrentIndex + 1,
-    find_last_zero_index(Rest, NextIndex, LastZeroIndex).
+% Metaprimaria: find_last_zero_position/3
+find_last_zero_position([], _, -1).
+find_last_zero_position([0|Rest], CurrentPosition, LastZeroPosition) :-
+    NextPosition is CurrentPosition + 1,
+    find_last_zero_position(Rest, NextPosition, PrevLastZeroPosition),
+    (PrevLastZeroPosition = -1 -> LastZeroPosition = CurrentPosition 
+                             ;  LastZeroPosition = PrevLastZeroPosition).
+find_last_zero_position([_|Rest], CurrentPosition, LastZeroPosition) :-
+    NextPosition is CurrentPosition + 1,
+    find_last_zero_position(Rest, NextPosition, LastZeroPosition).
 
 % Reemplazar un elemento en un índice específico de una lista
-replace_at_index_custom(List, Index, NewElement, NewList) :-
-    replace_at_index_aux(List, Index, NewElement, NewList, 0).
+% Metaprimaria: update_column_at_position/4
+update_column_at_position(List, Position, NewElement, NewList) :-
+    update_list_element(List, Position, NewElement, NewList, 0).
 
 % Función auxiliar de reemplazo recursivo
-replace_at_index_aux([], _, _, [], _).
-replace_at_index_aux([_|Rest], Index, NewElement, [NewElement|Rest], Index) :- !.
-replace_at_index_aux([Head|Rest], Index, NewElement, [Head|NewRest], CurrentIndex) :-
-    NextIndex is CurrentIndex + 1,
-    replace_at_index_aux(Rest, Index, NewElement, NewRest, NextIndex).
+% Metaprimaria: update_list_element/5
+update_list_element([], _, _, [], _).
+update_list_element([_|Rest], Position, NewElement, [NewElement|Rest], Position) :- !.
+update_list_element([Head|Rest], Position, NewElement, [Head|NewRest], CurrentPosition) :-
+    NextPosition is CurrentPosition + 1,
+    update_list_element(Rest, Position, NewElement, NewRest, NextPosition).
 
 
 % get_column(Board, ColumnNum, ListColumn)
+
 get_column(Board, ColumnNum, Column) :-
     between(1, 7, ColumnNum),
     findall(Element,(mymember(Row, Board),
     get_element_at(Row, ColumnNum, Element)), Column).
 
-% replace_column(Board, ColumnNum, NewColumn, NewBoard)
-replace_column(Board, ColumnNum, NewColumn, NewBoard) :-
-    replace_column(Board, ColumnNum, NewColumn, NewBoard, 1).
+% update_board_column(Board, ColumnNum, NewColumn, NewBoard)    
+update_board_column(Board, ColumnNum, NewColumn, NewBoard) :-
+    update_board_column(Board, ColumnNum, NewColumn, NewBoard, 1).
 
 
 % Predicado auxiliar para seleccionar el elemento según el número de columna
@@ -142,6 +149,3 @@ mylenght( [], 0 ).
 mylenght( [_|Tail], Lenght) :-
 	mylenght( Tail, LenghtAcum ),
 	Lenght is LenghtAcum + 1.
-
-
-
