@@ -16,7 +16,7 @@ board([
 can_play(Board) :- 
     board(Board),         
     mymember(Row, Board),  
-    mymember(0, Row).      
+    mymember(0, Row).     
 
 
 % RF06
@@ -36,20 +36,19 @@ play_piece(Board, Column, Piece, NewBoard) :-
 % da el índice de la posición más baja disponible
 % Metaprimaria: find_lowest_empty_row/2
 find_lowest_empty_row(ColumnList, RowPosition) :-
-    % Función para encontrar el índice del último cero desde abajo
     find_last_zero_position(ColumnList, 0, RowPosition).
 
 % da el índice del último cero
 % Metaprimaria: find_last_zero_position/3
 find_last_zero_position([], _, -1).
-find_last_zero_position([0|Rest], CurrentPosition, LastZeroPosition) :-
+find_last_zero_position([0|Tail], CurrentPosition, LastZeroPosition) :-
     NextPosition is CurrentPosition + 1,
-    find_last_zero_position(Rest, NextPosition, PrevLastZeroPosition),
+    find_last_zero_position(Tail, NextPosition, PrevLastZeroPosition),
     (PrevLastZeroPosition = -1 -> LastZeroPosition = CurrentPosition 
                              ;  LastZeroPosition = PrevLastZeroPosition).
-find_last_zero_position([_|Rest], CurrentPosition, LastZeroPosition) :-
+find_last_zero_position([_|Tail], CurrentPosition, LastZeroPosition) :-
     NextPosition is CurrentPosition + 1,
-    find_last_zero_position(Rest, NextPosition, LastZeroPosition).
+    find_last_zero_position(Tail, NextPosition, LastZeroPosition).
 
 % Reemplazar un elemento en un índice específico de una lista
 % Metaprimaria: update_column_at_position/4
@@ -59,18 +58,18 @@ update_column_at_position(List, Position, NewElement, NewList) :-
 % Función auxiliar de reemplazo recursivo
 % Metaprimaria: update_list_element/5
 update_list_element([], _, _, [], _).
-update_list_element([_|Rest], Position, NewElement, [NewElement|Rest], Position) :- !.
-update_list_element([Head|Rest], Position, NewElement, [Head|NewRest], CurrentPosition) :-
+update_list_element([_|Tail], Position, NewElement, [NewElement|Tail], Position) :- !.
+update_list_element([Head|Tail], Position, NewElement, [Head|NewTail], CurrentPosition) :-
     NextPosition is CurrentPosition + 1,
-    update_list_element(Rest, Position, NewElement, NewRest, NextPosition).
+    update_list_element(Tail, Position, NewElement, NewTail, NextPosition).
 
 
 % get_column(Board, ColumnNum, ListColumn)
 
 get_column(Board, ColumnNum, Column) :-
-    between(1, 7, ColumnNum),
-    findall(Element,(mymember(Row, Board),
-    get_element_at(Row, ColumnNum, Element)), Column).
+    findall(Element, (mymember(Row, Board),
+    get_element_at(Row, ColumnNum, Element)), 
+    Column).
 
 % update_board_column(Board, ColumnNum, NewColumn, NewBoard)    
 update_board_column(Board, ColumnNum, NewColumn, NewBoard) :-
@@ -93,6 +92,23 @@ sixth_at_list(Row, Element).
 get_element_at(Row, 7, Element) :- 
 seventh_at_list(Row, Element).
 
+
+% RF07 - Verificar victoria vertical
+% Dominio: Board X Winner
+% Metaprimaria: vertical_winner/2
+check_vertical_win(Board, Winner) :-
+
+% Verifica victoria vertical para un jugador específico
+check_vertical_win_for_player(Board, Player) :-
+    between(1, 7, Column),
+    get_column(Board, Column, ColumnList),
+    cuatro_consecutivas(ColumnList, Player).
+
+% Verifica si hay 4 fichas consecutivas del mismo jugador
+cuatro_consecutivas([Player,Player,Player,Player|_], Player) :-
+    Player \= 0.
+cuatro_consecutivas([_|Resto], Player) :-
+    cuatro_consecutivas(Resto, Player).
 
 
 
@@ -139,11 +155,11 @@ seventh_at_list([_,_,_,_,_,_,Seventh|_], Seventh).
 
 % last_at_list: Obtiene el último elemento de una lista
 last_at_list([Last], Last).
-last_at_list([_|Rest], Last) :- 
-    last_at_list(Rest, Last).
+last_at_list([_|Tail], Last) :- 
+    last_at_list(Tail, Last).
 
-% rest_at_list: Obtiene el resto de la lista sin el primer elemento
-rest_at_list([_|Rest], Rest).
+% Tail_at_list: Obtiene el Tailo de la lista sin el primer elemento
+Tail_at_list([_|Tail], Tail).
 
 mylenght( [], 0 ).
 mylenght( [_|Tail], Lenght) :-
