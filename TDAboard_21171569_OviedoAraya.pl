@@ -1,7 +1,8 @@
+:- module('TDAboard_21171569_OviedoAraya', [board/1, can_play/1]).
+
 % RF04 
 % Dominio: No recibe parqmetros de entrada
 % Metaprimaria: board/0
-
 board([
     [0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0],
@@ -10,105 +11,103 @@ board([
     [0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0]]).
 
+% solo para probar es este
+%tablero_lleno([
+%    [1, 1, 1, 1, 1, 1, 1],
+%    [1, 1, 1, 1, 1, 1, 1],
+%    [1, 1, 1, 1, 1, 1, 1],
+%    [1, 1, 1, 1, 1, 1, 1],
+%    [1, 1, 1, 1, 1, 1, 1],
+%    [1, 1, 1, 1, 1, 1, 1]]).
 
-% RF05
+% RF05 - Verificar si se puede jugar
+can_play(Board) :-
+    mymember(Row, Board),      
+    mymember(0, Row),       
+     write('true'), nl,   % va a tirar true cuando encuentre un 0
+    !.                        
 
-can_play(Board) :- 
-    board(Board),         
-    mymember(Row, Board),  
-    mymember(0, Row).     
+% Si no se encuentra 0, retorna false
+can_play(_) :- false.
 
+% RF06 - Jugar una ficha en el tablero
+% Meta primaria: play_piece/4
 
-% RF06
-% Dominio: Board X Column X Piece X NewBoard
-% Metaprimaria: play_piece/4
-play_piece(Board, Column, Piece, NewBoard) :-
-    board(Board),
-    can_play(Board),
-    mymember(Column, [1,2,3,4,5,6,7]),
-    get_column(Board, Column, ColumnList),
-    mymember(0, ColumnList),     % Verificar que la columna no esté llena (tiene al menos un 0)
-    find_lowest_empty_row(ColumnList, RowPosition),
-    update_column_at_position(ColumnList, RowPosition, Piece, UpdatedColumn),
-    update_board_column(Board, Column, UpdatedColumn, NewBoard).
-    
-    
-% da el índice de la posición más baja disponible
-% Metaprimaria: find_lowest_empty_row/2
-find_lowest_empty_row(ColumnList, RowPosition) :-
-    find_last_zero_position(ColumnList, 0, RowPosition).
-
-% da el índice del último cero
-% Metaprimaria: find_last_zero_position/3
-find_last_zero_position([], _, -1).
-find_last_zero_position([0|Tail], CurrentPosition, LastZeroPosition) :-
-    NextPosition is CurrentPosition + 1,
-    find_last_zero_position(Tail, NextPosition, PrevLastZeroPosition),
-    (PrevLastZeroPosition = -1 -> LastZeroPosition = CurrentPosition 
-                             ;  LastZeroPosition = PrevLastZeroPosition).
-find_last_zero_position([_|Tail], CurrentPosition, LastZeroPosition) :-
-    NextPosition is CurrentPosition + 1,
-    find_last_zero_position(Tail, NextPosition, LastZeroPosition).
-
-% Reemplazar un elemento en un índice específico de una lista
-% Metaprimaria: update_column_at_position/4
-update_column_at_position(List, Position, NewElement, NewList) :-
-    update_list_element(List, Position, NewElement, NewList, 0).
-
-% Función auxiliar de reemplazo recursivo
-% Metaprimaria: update_list_element/5
-update_list_element([], _, _, [], _).
-update_list_element([_|Tail], Position, NewElement, [NewElement|Tail], Position) :- !.
-update_list_element([Head|Tail], Position, NewElement, [Head|NewTail], CurrentPosition) :-
-    NextPosition is CurrentPosition + 1,
-    update_list_element(Tail, Position, NewElement, NewTail, NextPosition).
+play_piece(Board, PlayerColumn, Piece, NewBoard) :-
+    Column is PlayerColumn - 1,  % le resto 1 para que quede más intuitivo 
+    Column >= 0, Column =< 6,  
+    find_lowest_available_row(Board, Column, 0, LowestRow),
+    piece_to_number(Piece, PieceNumber),
+    update_board(Board, LowestRow, Column, PieceNumber, NewBoard).
 
 
-% get_column(Board, ColumnNum, ListColumn)
+% Convertir pieza a número el 1 para el rojo y el 2 pa amarillo
+piece_to_number([Color], Number) :-
+    (Color = "red" -> Number = 1;
+     Color = "yellow" -> Number = 2).
 
-get_column(Board, ColumnNum, Column) :-
-    findall(Element, (mymember(Row, Board),
-    get_element_at(Row, ColumnNum, Element)), 
-    Column).
+% Encontrar la fila más baja disponible en una columna
+find_lowest_available_row(Board, Column, CurrentRow, LowestRow) :-
+    CurrentRow < 6,  % Verificar límite del tablero
+    get_cell_value(Board, CurrentRow, Column, CellValue),
+    CellValue = 0,  % Celda vacía encontrada
+    NextRow is CurrentRow + 1,
+    (NextRow = 6 ; 
+     get_cell_value(Board, NextRow, Column, NextValue),
+     NextValue \= 0), !,  % Siguiente celda ocupada o fin del tablero
+    LowestRow = CurrentRow.
 
-% update_board_column(Board, ColumnNum, NewColumn, NewBoard)    
-update_board_column(Board, ColumnNum, NewColumn, NewBoard) :-
-    update_board_column(Board, ColumnNum, NewColumn, NewBoard, 1).
+find_lowest_available_row(Board, Column, CurrentRow, LowestRow) :-
+    CurrentRow < 5,
+    NextRow is CurrentRow + 1,
+    find_lowest_available_row(Board, Column, NextRow, LowestRow).
 
+% Obtener valor de una celda específica del tablero
+get_cell_value(Board, Row, Column, Value) :-
+    get_row(Board, Row, RowList),
+    get_column(RowList, Column, Value).
 
-% Predicado auxiliar para seleccionar el elemento según el número de columna
-get_element_at(Row, 1, Element) :- 
-first_at_list(Row, Element).
-get_element_at(Row, 2, Element) :- 
-second_at_list(Row, Element).
-get_element_at(Row, 3, Element) :- 
-third_at_list(Row, Element).
-get_element_at(Row, 4, Element) :- 
-fourth_at_list(Row, Element).
-get_element_at(Row, 5, Element) :- 
-fifth_at_list(Row, Element).
-get_element_at(Row, 6, Element) :- 
-sixth_at_list(Row, Element).
-get_element_at(Row, 7, Element) :- 
-seventh_at_list(Row, Element).
+% Obtener fila específica del tablero
+get_row(Board, 0, Row) :- first_at_list(Board, Row).
+get_row(Board, 1, Row) :- second_at_list(Board, Row).
+get_row(Board, 2, Row) :- third_at_list(Board, Row).
+get_row(Board, 3, Row) :- fourth_at_list(Board, Row).
+get_row(Board, 4, Row) :- fifth_at_list(Board, Row).
+get_row(Board, 5, Row) :- sixth_at_list(Board, Row).
 
+% Obtener valor de una columna en una fila
+get_column(Row, 0, Value) :- first_at_list(Row, Value).
+get_column(Row, 1, Value) :- second_at_list(Row, Value).
+get_column(Row, 2, Value) :- third_at_list(Row, Value).
+get_column(Row, 3, Value) :- fourth_at_list(Row, Value).
+get_column(Row, 4, Value) :- fifth_at_list(Row, Value).
+get_column(Row, 5, Value) :- sixth_at_list(Row, Value).
+get_column(Row, 6, Value) :- seventh_at_list(Row, Value).
 
-% RF07 - Verificar victoria vertical
-% Dominio: Board X Winner
-% Metaprimaria: vertical_winner/2
-check_vertical_win(Board, Winner) :-
+% Actualizar el tablero con una nueva pieza
+update_board(Board, Row, Column, PieceNumber, NewBoard) :-
+    get_row(Board, Row, CurrentRow),
+    update_row(CurrentRow, Column, PieceNumber, UpdatedRow),
+    replace_row(Board, Row, UpdatedRow, NewBoard).
 
-% Verifica victoria vertical para un jugador específico
-check_vertical_win_for_player(Board, Player) :-
-    between(1, 7, Column),
-    get_column(Board, Column, ColumnList),
-    cuatro_consecutivas(ColumnList, Player).
+% Actualizar una fila con un nuevo valor
+update_row(Row, Column, Value, NewRow) :-
+    update_list_position(Row, Column, Value, NewRow).
 
-% Verifica si hay 4 fichas consecutivas del mismo jugador
-cuatro_consecutivas([Player,Player,Player,Player|_], Player) :-
-    Player \= 0.
-cuatro_consecutivas([_|Resto], Player) :-
-    cuatro_consecutivas(Resto, Player).
+% Reemplazar una fila en el tablero
+replace_row(Board, 0, NewRow, [NewRow|RestOfBoard]) :- 
+    tail_at_list(Board, RestOfBoard).
+replace_row([CurrentRow|RestOfBoard], Row, NewRow, [CurrentRow|UpdatedBoard]) :-
+    Row > 0,
+    NextRow is Row - 1,
+    replace_row(RestOfBoard, NextRow, NewRow, UpdatedBoard).
+
+% Actualizar posición en una lista
+update_list_position([_|Rest], 0, Value, [Value|Rest]).
+update_list_position([Current|Rest], Position, Value, [Current|NewRest]) :-
+    Position > 0,
+    NextPosition is Position - 1,
+    update_list_position(Rest, NextPosition, Value, NewRest).
 
 
 

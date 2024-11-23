@@ -1,6 +1,16 @@
+:- module('TDAplayer_21171569_OviedoAraya', [
+    player/8,
+    get_id/2,
+    get_name/2,
+    get_color/2,
+    get_wins/2,
+    get_losses/2,
+    get_draws/2,
+    get_remaining_pieces/2
+]).
 % RF1
 % Dominio : id (int) X name (string) X color (string) X wins (int) X losses (int) X draws (int) X remaining_pieces (int) X Player
-% Metaprimaria/8
+% Metaprimaria: player/8
 
 player(Id, Name, Color, Wins, Losses, Draws, Remaining_pieces, [Id, Name, Color, Wins, Losses, Draws, Remaining_pieces]) :-
     integer(Id),
@@ -14,9 +24,8 @@ player(Id, Name, Color, Wins, Losses, Draws, Remaining_pieces, [Id, Name, Color,
     Losses >= 0,
     Draws >= 0,
     Remaining_pieces >= 4,
-    Remaining_pieces < 21.
-    
-    
+    Remaining_pieces =< 21.
+   
 % Selectores
 % get_id: Selecciona el id del jugador
 get_id([Id, _, _, _, _, _, _], Id).
@@ -38,4 +47,3 @@ get_draws([_, _, _, _, _, Draws, _], Draws).
 
 % get_remaining_pieces: Selecciona el numero de fichas restantes del jugador
 get_remaining_pieces([_, _, _, _, _, _, Remaining_pieces], Remaining_pieces).
-
