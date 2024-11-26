@@ -21,12 +21,12 @@ board([
 
 % RF05 - Verificar si se puede jugar
 can_play(Board) :-
-    mymember(Row, Board),       
-    mymember(0, Row),           
+    mymember(Row, Board),       % Buscamos en las filas
+    mymember(0, Row),           % Buscamos un 0
      write('true'), nl,   % Imprimir true cuando se puede jugar
-    !.                       
+    !.                        % Cortamos la búsqueda al encontrar el primer 0
 
-% Si no se encuentra 0, retorna false
+% Si no se encuentra ningún 0, retorna false
 can_play(_) :- false.
 
 % RF06 - Jugar una ficha en el tablero
@@ -40,7 +40,7 @@ play_piece(Board, PlayerColumn, Piece, NewBoard) :-
     update_board(Board, LowestRow, Column, PieceNumber, NewBoard).
 
 
-% Convertir pieza a número el 1 para el rojo y el 2 para el amarillo
+% Convertir pieza a número (1=rojo, 2=amarillo)
 piece_to_number([Color], Number) :-
     (Color = "red" -> Number = 1;
      Color = "yellow" -> Number = 2).
@@ -111,36 +111,74 @@ update_list_position([Current|Rest], Position, Value, [Current|NewRest]) :-
 % RF07 - Verificar si hay un ganador vertical
 
 % Verificar victoria vertical
-% caso base
-check_vertical_winner(_, 0).
-check_vertical_winner(Board, Winner) :-
+
+check_vertical_win(Board, Winner) :-
     mymember(Column, [0,1,2,3,4,5,6]),  % para el vertial tengo que iterar sobre los índices, para el horizotal se podrá poner el Board altiro.
     get_column(Board, Column, ColumnValues),   
     check_consecutive_four(ColumnValues, Winner). 
-
+% caso base
+check_vertical_win(_, 0).
 % Extraer una columna completa del tablero
 get_column(Board, ColumnPosition, Column) :-
     findall(Value, (mymember(Row, Board),get_position_in_row(Row, ColumnPosition, Value)),Column).
-% Verificar si hay 4 consecutivos iguales en una lista (columna)
-check_consecutive_four([Value,Value,Value,Value|_], Value) :- Value \= 0.  
+
+% RF08 - Verificar si hay un ganador horizontal
+check_horizontal_win(Board, Winner) :-
+    mymember(Row, Board),       
+    check_consecutive_four(Row, Winner),
+    Winner \= 0.  % Aseguramos que el ganador no sea 0
+
+check_horizontal_win(_, 0).  % Caso base - si no encuentra ganador retorna 0
+
+% Verificar si hay 4 consecutivos iguales en una lista (fila)
+check_consecutive_four([Value,Value,Value,Value|_], Value) :- 
+    Value \= 0.  
 check_consecutive_four([_|Rest], Winner) :-       
     check_consecutive_four(Rest, Winner).
 
-% RF08 - Verificar si hay un ganador horizontal
-% caso base
-check_horizontal_win(_, 0).
-check__horizontal_winner(Board, Winner) :-
-    mymember(Row, Board),       
-    check_consecutive_four(Row, Winner).
 % RF09 - Verificar si hay un ganador diagonal
-% caso base
-check_diagonal_winner(_, 0).
-% Se supone que se puede ganar en forma ascendente y descendente
-% Ver si hay 4 consecutivos en diagonal ascendente, donde tendria que aumentar la columna y disminuir la fila en cada paso
-% Ver si hay 4 consecutivos en diagonal descendente, donde tendria que aumentar la columna y aumentar la fila en cada paso
 check_diagonal_win(Board, Winner) :-
-    (check_ascending_diagonal(Board, Winner);
-     check_descending_diagonal(Board, Winner)).
+    (check_up_diagonal(Board, Winner);
+     check_down_diagonal(Board, Winner)),
+    Winner \= 0, !.
+
+check_diagonal_win(_, 0).  % Caso base - no hay ganador diagonal
+
+% Diagonal ascendente
+check_up_diagonal(Board, Winner) :-
+    between(3, 5, Row),   
+    between(0, 3, Col),   
+    get_cell_value(Board, Row, Col, Value),
+    Value \= 0,
+    R1 is Row - 1,
+    R2 is Row - 2,
+    R3 is Row - 3,
+    C1 is Col + 1,
+    C2 is Col + 2,
+    C3 is Col + 3,
+    get_cell_value(Board, R1, C1, Value),
+    get_cell_value(Board, R2, C2, Value),
+    get_cell_value(Board, R3, C3, Value),
+    Winner = Value.
+
+% Diagonal descendente
+check_down_diagonal(Board, Winner) :-
+    between(0, 2, Row),  
+    between(0, 3, Col),   
+    get_cell_value(Board, Row, Col, Value),
+    Value \= 0,
+    R1 is Row + 1,
+    R2 is Row + 2,
+    R3 is Row + 3,
+    C1 is Col + 1,
+    C2 is Col + 2,
+    C3 is Col + 3,
+    get_cell_value(Board, R1, C1, Value),
+    get_cell_value(Board, R2, C2, Value),
+    get_cell_value(Board, R3, C3, Value),
+    Winner = Value.
+
+
 
 
 
