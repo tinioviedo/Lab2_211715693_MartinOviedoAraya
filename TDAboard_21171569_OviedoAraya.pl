@@ -19,25 +19,25 @@ board([
 %    [1, 1, 1, 1, 1, 1, 1],
 %    [1, 1, 1, 1, 1, 1, 1]]).
 
+% -------------------------------------------------------------------------
+
 % RF05 - Verificar si se puede jugar
 can_play(Board) :-
     mymember(Row, Board),       % Buscamos en las filas
-    mymember(0, Row),           % Buscamos un 0
-     write('true'), nl,   % Imprimir true cuando se puede jugar
-    !.                        % Cortamos la búsqueda al encontrar el primer 0
+    mymember(0, Row).           % Buscamos un 0
 
 % Si no se encuentra ningún 0, retorna false
 can_play(_) :- false.
 
+% -------------------------------------------------------------------------
 % RF06 - Jugar una ficha en el tablero
 
 play_piece(Board, PlayerColumn, Piece, NewBoard) :-
-    % Ajustar la columna del jugador (1-7) a índices internos (0-6)
-    Column is PlayerColumn - 1,  
-    Column >= 0, Column =< 6,  % Verificar si está dentro del rango
-    find_lowest_available_row(Board, Column, 0, LowestRow),
+    PlayerColumn >= 0, 
+    PlayerColumn =< 6,  
+    find_lowest_available_row(Board, PlayerColumn, 0, LowestRow),
     piece_to_number(Piece, PieceNumber),
-    update_board(Board, LowestRow, Column, PieceNumber, NewBoard).
+    update_board(Board, LowestRow, PlayerColumn, PieceNumber, NewBoard).
 
 
 % Convertir pieza a número (1=rojo, 2=amarillo)
@@ -47,13 +47,13 @@ piece_to_number([Color], Number) :-
 
 % Encontrar la fila más baja disponible en una columna
 find_lowest_available_row(Board, Column, CurrentRow, LowestRow) :-
-    CurrentRow < 6,  % Verificar límite del tablero
+    CurrentRow < 6,
     get_cell_value(Board, CurrentRow, Column, CellValue),
-    CellValue = 0,  % Celda vacía encontrada
+    CellValue = 0,  
     NextRow is CurrentRow + 1,
     (NextRow = 6 ; 
      get_cell_value(Board, NextRow, Column, NextValue),
-     NextValue \= 0), !,  % Siguiente celda ocupada o fin del tablero
+     NextValue \= 0), !,
     LowestRow = CurrentRow.
 
 find_lowest_available_row(Board, Column, CurrentRow, LowestRow) :-
@@ -61,7 +61,7 @@ find_lowest_available_row(Board, Column, CurrentRow, LowestRow) :-
     NextRow is CurrentRow + 1,
     find_lowest_available_row(Board, Column, NextRow, LowestRow).
 
-% Obtener valor de una celda específica del tablero
+% Obtener valor de una posición específica del tablero
 get_cell_value(Board, Row, Column, Value) :-
     get_row(Board, Row, RowList),
     get_position_in_row(RowList, Column, Value).
@@ -108,6 +108,7 @@ update_list_position([Current|Rest], Position, Value, [Current|NewRest]) :-
     NextPosition is Position - 1,
     update_list_position(Rest, NextPosition, Value, NewRest).
 
+% -------------------------------------------------------------------------
 % RF07 - Verificar si hay un ganador vertical
 
 % Verificar victoria vertical
@@ -122,13 +123,15 @@ check_vertical_win(_, 0).
 get_column(Board, ColumnPosition, Column) :-
     findall(Value, (mymember(Row, Board),get_position_in_row(Row, ColumnPosition, Value)),Column).
 
+
+% -------------------------------------------------------------------------
 % RF08 - Verificar si hay un ganador horizontal
 check_horizontal_win(Board, Winner) :-
     mymember(Row, Board),       
     check_consecutive_four(Row, Winner),
     Winner \= 0.  % Aseguramos que el ganador no sea 0
 
-check_horizontal_win(_, 0).  % Caso base - si no encuentra ganador retorna 0
+check_horizontal_win(_, 0).  % Caso base, si no encuentra ganador retorna 0
 
 % Verificar si hay 4 consecutivos iguales en una lista (fila)
 check_consecutive_four([Value,Value,Value,Value|_], Value) :- 
@@ -136,14 +139,15 @@ check_consecutive_four([Value,Value,Value,Value|_], Value) :-
 check_consecutive_four([_|Rest], Winner) :-       
     check_consecutive_four(Rest, Winner).
 
+% -------------------------------------------------------------------------
+
 % RF09 - Verificar si hay un ganador diagonal
 check_diagonal_win(Board, Winner) :-
     (check_up_diagonal(Board, Winner);
      check_down_diagonal(Board, Winner)),
     Winner \= 0, !.
 
-check_diagonal_win(_, 0).  % Caso base - no hay ganador diagonal
-
+check_diagonal_win(_, 0). % Caso base, no hay ganador diagonal
 % Diagonal ascendente
 check_up_diagonal(Board, Winner) :-
     between(3, 5, Row),   
@@ -178,7 +182,15 @@ check_down_diagonal(Board, Winner) :-
     get_cell_value(Board, R3, C3, Value),
     Winner = Value.
 
-
+% -------------------------------------------------------------------------
+% RF10  TDA Board - otros - entregarGanador, Requisitos de implementación Utilizar las predicados de verificación vertical, horizontal y diagonal para determinar si hay un ganador. Un ganador puede ser vertical, horizontal o diagonal. Realizar de forma declarativa. Dominio board (Board) 9 Recorrido int (1 si gana jugador 1, 2 si gana jugador 2, 0 si no hay ganador vertical) Ejemplo de uso who_is_winner(Board, Winner)
+who_is_winner(Board, Winner) :-
+    (check_vertical_win(Board, Winner), Winner \= 0;
+    check_horizontal_win(Board, Winner), Winner \= 0;
+    check_diagonal_win(Board, Winner), Winner \= 0),
+    !.
+% caso base
+who_is_winner(_, 0).
 
 
 
