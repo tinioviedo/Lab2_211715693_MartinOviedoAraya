@@ -1,7 +1,7 @@
-:- module('TDApiece_21171569_OviedoAraya', [piece/2]).
-% RF2
-% Dominio: color (string)
-% Metaprimaria: piece/2.
+%RF03
+%Descripcion: TDA Piece - constructor que crea una ficha de Conecta4.
+%Dominio: color (string)
+%Metaprimaria: piece/2.
 
 piece(Color, [Color]) :- 
     (Color = "red" ; Color = "yellow").
